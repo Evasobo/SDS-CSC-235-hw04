@@ -18,7 +18,7 @@ d3.csv("february_weather.csv").then(data => {
   data.forEach(d => {
     d.date = new Date(d.date_time);
     d.temp = +d.temperature_c;
-
+    data.sort((a, b) => a.date - b.date);
     // create uncertainty
     d.min = d.temp - 2;
     d.max = d.temp + 2;
