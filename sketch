@@ -56,4 +56,16 @@ Task 2: Compare Average Temperatures Across Cities (Bar Chart)
 • Identify the city with the highest average temperature
 • Hover to confirm exact value
 
+Notes on User Testing:
 
+Main Chart (Line + Uncertainty Area)
+ - Users could select a city and view temperature trends.
+ - It was initially difficult for users to see which exact day they were hovering over.
+Bar Chart (Average Temperatures Across Cities)
+- Users could identify cities with higher average temperatures, but the chart was too small.
+- Labels on the x-axis overlapped, making it hard to read city names.
+
+Reasonable Adjustment in Response to Testing:
+
+- Main Chart: Added concise date information to the tooltip on hover so users can clearly see which day they are inspecting.
+- Bar Chart: Increased the chart size and adjusted axis labels to prevent overlapping, improving readability.
