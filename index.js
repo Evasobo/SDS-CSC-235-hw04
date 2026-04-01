@@ -10,6 +10,32 @@ const g = svg
 
 const tooltip = d3.select("#tooltip");
 
+// 🔥 SECOND VIS SETUP
+const detailSvg = d3.select("#detail");
+const detailWidth = 200;
+const detailHeight = 200;
+
+const detailY = d3.scaleLinear().range([detailHeight - 20, 20]);
+
+const barGroup = detailSvg.append("g");
+
+// vertical line (uncertainty range)
+const rangeLine = barGroup.append("line")
+  .attr("stroke", "black")
+  .attr("stroke-width", 2);
+
+// mean point
+const meanCircle = barGroup.append("circle")
+  .attr("r", 5)
+  .attr("fill", "red");
+
+// label
+detailSvg.append("text")
+  .attr("x", 100)
+  .attr("y", 15)
+  .attr("text-anchor", "middle")
+  .text("Temp Range");
+
 let showUncertainty = true;
 
 d3.csv("february_weather.csv").then(data => {
@@ -18,7 +44,6 @@ d3.csv("february_weather.csv").then(data => {
   data.forEach(d => {
     d.date = new Date(d.date_time);
     d.temp = +d.temperature_c;
-    // create uncertainty
     d.min = d.temp - 2;
     d.max = d.temp + 2;
   });
@@ -45,7 +70,7 @@ d3.csv("february_weather.csv").then(data => {
     .x(d => x(d.date))
     .y(d => y(d.temp));
 
-  // 🔹 Area generator (uncertainty)
+  // 🔹 Area generator
   const area = d3.area()
     .x(d => x(d.date))
     .y0(d => y(d.min))
@@ -75,21 +100,24 @@ d3.csv("february_weather.csv").then(data => {
     .attr("pointer-events", "all");
 
   function update(city) {
+
     const filtered = Array.from(
-        d3.group(
-            data.filter(d => d.location === city),
-            d => d.date.toDateString() // group by day
-        ),
-        ([key, values]) => {
-            const avgTemp = d3.mean(values, d => d.temp);
-            return {
-            date: new Date(key),
-            temp: avgTemp,
-            min: avgTemp - 2,
-            max: avgTemp + 2
-            };
-        }
-        ).sort((a, b) => a.date - b.date);
+      d3.group(
+        data.filter(d => d.location === city),
+        d => d.date.toDateString()
+      ),
+      ([key, values]) => {
+        const avgTemp = d3.mean(values, d => d.temp);
+        return {
+          date: new Date(key),
+          temp: avgTemp,
+          min: avgTemp - 2,
+          max: avgTemp + 2,
+          location: city // 🔥 fix tooltip
+        };
+      }
+    ).sort((a, b) => a.date - b.date);
+
     x.domain(d3.extent(filtered, d => d.date));
     y.domain([
       d3.min(filtered, d => d.min),
@@ -112,7 +140,7 @@ d3.csv("february_weather.csv").then(data => {
       areaPath.style("display", "none");
     }
 
-    // 🔹 Hover interaction
+    // 🔥 HOVER + SECOND VIS
     overlay.on("mousemove", function(event) {
       const [mx] = d3.pointer(event);
       const date = x.invert(mx);
@@ -123,6 +151,7 @@ d3.csv("february_weather.csv").then(data => {
 
       if (!d) return;
 
+      // Tooltip
       tooltip
         .style("opacity", 1)
         .html(`
@@ -132,20 +161,40 @@ d3.csv("february_weather.csv").then(data => {
         `)
         .style("left", (event.pageX + 10) + "px")
         .style("top", (event.pageY - 20) + "px");
+
+      // 🔥 UPDATE SECOND VIS
+      detailY.domain([
+        d3.min(filtered, d => d.min),
+        d3.max(filtered, d => d.max)
+      ]);
+
+      // range line
+      rangeLine
+        .attr("x1", 100)
+        .attr("x2", 100)
+        .attr("y1", detailY(d.min))
+        .attr("y2", detailY(d.max));
+
+      // mean point
+      meanCircle
+        .attr("cx", 100)
+        .attr("cy", detailY(d.temp));
     })
-    .on("mouseout", () => tooltip.style("opacity", 0));
+    .on("mouseout", () => {
+      tooltip.style("opacity", 0);
+    });
   }
 
   // 🔹 Initial render
   update(currentCity);
 
-  // 🔹 Dropdown interaction
+  // 🔹 Dropdown
   select.on("change", function() {
     currentCity = this.value;
     update(currentCity);
   });
 
-  // 🔹 Toggle interaction
+  // 🔹 Toggle
   d3.select("#toggle-btn").on("click", () => {
     showUncertainty = !showUncertainty;
 
