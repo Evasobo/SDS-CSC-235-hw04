@@ -10,32 +10,6 @@ const g = svg
 
 const tooltip = d3.select("#tooltip");
 
-// 🔥 SECOND VIS SETUP
-const detailSvg = d3.select("#detail");
-const detailWidth = 200;
-const detailHeight = 200;
-
-const detailY = d3.scaleLinear().range([detailHeight - 20, 20]);
-
-const barGroup = detailSvg.append("g");
-
-// vertical line (uncertainty range)
-const rangeLine = barGroup.append("line")
-  .attr("stroke", "black")
-  .attr("stroke-width", 2);
-
-// mean point
-const meanCircle = barGroup.append("circle")
-  .attr("r", 5)
-  .attr("fill", "red");
-
-// label
-detailSvg.append("text")
-  .attr("x", 100)
-  .attr("y", 15)
-  .attr("text-anchor", "middle")
-  .text("Temp Range");
-
 let showUncertainty = true;
 
 d3.csv("february_weather.csv").then(data => {
@@ -77,27 +51,27 @@ d3.csv("february_weather.csv").then(data => {
     .y1(d => y(d.max));
 
   // 🔹 Axes
-const xAxis = g.append("g")
-  .attr("transform", `translate(0,${height})`);
+  const xAxis = g.append("g")
+    .attr("transform", `translate(0,${height})`);
 
-const yAxis = g.append("g");
+  const yAxis = g.append("g");
 
-// X-axis label
-g.append("text")
-  .attr("x", width / 2)
-  .attr("y", height + 60)
-  .attr("text-anchor", "middle")
-  .attr("fill", "black")
-  .text("Date");
+  // X-axis label
+  g.append("text")
+    .attr("x", width / 2)
+    .attr("y", height + 60)
+    .attr("text-anchor", "middle")
+    .attr("fill", "black")
+    .text("Date");
 
-// Y-axis label
-g.append("text")
-  .attr("transform", "rotate(-90)")
-  .attr("x", -height / 2)
-  .attr("y", -60)
-  .attr("text-anchor", "middle")
-  .attr("fill", "black")
-  .text("Temperature (°C)");
+  // Y-axis label
+  g.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -height / 2)
+    .attr("y", -60)
+    .attr("text-anchor", "middle")
+    .attr("fill", "black")
+    .text("Temperature (°C)");
 
   // 🔹 Paths
   const areaPath = g.append("path")
@@ -130,7 +104,7 @@ g.append("text")
           temp: avgTemp,
           min: avgTemp - 2,
           max: avgTemp + 2,
-          location: city // 🔥 fix tooltip
+          location: city
         };
       }
     ).sort((a, b) => a.date - b.date);
@@ -142,10 +116,10 @@ g.append("text")
     ]);
 
     xAxis.call(
-  d3.axisBottom(x)
-    .ticks(6)
-    .tickFormat(d3.timeFormat("%b %d"))
-);
+      d3.axisBottom(x)
+        .ticks(6)
+        .tickFormat(d3.timeFormat("%b %d"))
+    );
 
     yAxis.call(d3.axisLeft(y));
 
@@ -162,49 +136,31 @@ g.append("text")
       areaPath.style("display", "none");
     }
 
-    // 🔥 HOVER + SECOND VIS
-    overlay.on("mousemove", function(event) {
-      const [mx] = d3.pointer(event);
-      const date = x.invert(mx);
+    // 🔥 Tooltip hover
+    overlay
+      .on("mousemove", function(event) {
+        const [mx] = d3.pointer(event);
+        const date = x.invert(mx);
 
-      const bisect = d3.bisector(d => d.date).left;
-      const i = bisect(filtered, date);
-      const d = filtered[i];
+        const bisect = d3.bisector(d => d.date).left;
+        const i = bisect(filtered, date);
+        const d = filtered[i];
 
-      if (!d) return;
+        if (!d) return;
 
-      // Tooltip
-      tooltip
-        .style("opacity", 1)
-        .html(`
-          <strong>${d.location}</strong><br>
-          Temp: ${d.temp.toFixed(1)}°C<br>
-          Range: ${d.min.toFixed(1)}–${d.max.toFixed(1)}°C
-        `)
-        .style("left", (event.pageX + 10) + "px")
-        .style("top", (event.pageY - 20) + "px");
-
-      // 🔥 UPDATE SECOND VIS
-      detailY.domain([
-        d3.min(filtered, d => d.min),
-        d3.max(filtered, d => d.max)
-      ]);
-
-      // range line
-      rangeLine
-        .attr("x1", 100)
-        .attr("x2", 100)
-        .attr("y1", detailY(d.min))
-        .attr("y2", detailY(d.max));
-
-      // mean point
-      meanCircle
-        .attr("cx", 100)
-        .attr("cy", detailY(d.temp));
-    })
-    .on("mouseout", () => {
-      tooltip.style("opacity", 0);
-    });
+        tooltip
+          .style("opacity", 1)
+          .html(`
+            <strong>${d.location}</strong><br>
+            Temp: ${d.temp.toFixed(1)}°C<br>
+            Range: ${d.min.toFixed(1)}–${d.max.toFixed(1)}°C
+          `)
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 20) + "px");
+      })
+      .on("mouseout", () => {
+        tooltip.style("opacity", 0);
+      });
   }
 
   // 🔹 Initial render
