@@ -75,9 +75,21 @@ d3.csv("february_weather.csv").then(data => {
     .attr("pointer-events", "all");
 
   function update(city) {
-    const filtered = data
-    .filter(d => d.location === city)
-    .sort((a, b) => a.date - b.date);
+    const filtered = Array.from(
+        d3.group(
+            data.filter(d => d.location === city),
+            d => d.date.toDateString() // group by day
+        ),
+        ([key, values]) => {
+            const avgTemp = d3.mean(values, d => d.temp);
+            return {
+            date: new Date(key),
+            temp: avgTemp,
+            min: avgTemp - 2,
+            max: avgTemp + 2
+            };
+        }
+        ).sort((a, b) => a.date - b.date);
     x.domain(d3.extent(filtered, d => d.date));
     y.domain([
       d3.min(filtered, d => d.min),
