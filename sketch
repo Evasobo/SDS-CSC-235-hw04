@@ -46,10 +46,10 @@ Interactions Summary:
 4. Toggle Button → Show/Hide uncertainty area on Main Chart
 
 Analysis Tasks:
-Task 1: Identify High-Uncertainty Days (Main Chart)
+Task 1: Identify High-Temperature Days (Main Chart)
 • Select a city from the dropdown
-• Find the day with the largest min-max range
-• Hover to confirm exact temperatures
+• Find the day with the largest temperatures
+• Hover to confirm day
 
 Task 2: Compare Average Temperatures Across Cities (Bar Chart)
 • Examine the bar chart
