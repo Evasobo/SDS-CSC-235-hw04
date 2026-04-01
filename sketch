@@ -25,6 +25,7 @@ Second Chart: Bar Graph – Average Temperature per City
 • Bars: Height represents the city’s average temperature
 • Interaction: 
     - Hover over bars to show tooltip with:
+        • Date
         • City name
         • Average temperature
 • Use Case Example:
