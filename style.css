@@ -9,7 +9,7 @@ body {
 
 svg {
   width: 800px;
-  height: 400px;
+  height: 500px;
   margin: auto;
   display: block;
 }
@@ -21,4 +21,8 @@ svg {
   padding: 8px;
   pointer-events: none;
   opacity: 0;
+}
+
+text {
+  fill: black;
 }

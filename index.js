@@ -1,5 +1,5 @@
 const svg = d3.select("#chart"),
-      margin = { top: 20, right: 30, bottom: 40, left: 50 },
+      margin = { top: 20, right: 30, bottom: 90, left: 90 },
       width = 800 - margin.left - margin.right,
       height = 400 - margin.top - margin.bottom;
 
@@ -77,10 +77,27 @@ d3.csv("february_weather.csv").then(data => {
     .y1(d => y(d.max));
 
   // 🔹 Axes
-  const xAxis = g.append("g")
-    .attr("transform", `translate(0,${height})`);
+const xAxis = g.append("g")
+  .attr("transform", `translate(0,${height})`);
 
-  const yAxis = g.append("g");
+const yAxis = g.append("g");
+
+// X-axis label
+g.append("text")
+  .attr("x", width / 2)
+  .attr("y", height + 60)
+  .attr("text-anchor", "middle")
+  .attr("fill", "black")
+  .text("Date");
+
+// Y-axis label
+g.append("text")
+  .attr("transform", "rotate(-90)")
+  .attr("x", -height / 2)
+  .attr("y", -60)
+  .attr("text-anchor", "middle")
+  .attr("fill", "black")
+  .text("Temperature (°C)");
 
   // 🔹 Paths
   const areaPath = g.append("path")
@@ -124,7 +141,12 @@ d3.csv("february_weather.csv").then(data => {
       d3.max(filtered, d => d.max)
     ]);
 
-    xAxis.call(d3.axisBottom(x));
+    xAxis.call(
+  d3.axisBottom(x)
+    .ticks(6)
+    .tickFormat(d3.timeFormat("%b %d"))
+);
+
     yAxis.call(d3.axisLeft(y));
 
     linePath
