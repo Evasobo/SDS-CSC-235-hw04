@@ -14,7 +14,7 @@ let showUncertainty = true;
 
 d3.csv("february_weather.csv").then(data => {
 
-  // 🔹 Parse data
+  // Parse data
   data.forEach(d => {
     d.date = new Date(d.date_time);
     d.temp = +d.temperature_c;
@@ -22,7 +22,7 @@ d3.csv("february_weather.csv").then(data => {
     d.max = d.temp + 2;
   });
 
-  // 🔹 Get unique cities
+  // Get unique cities
   const cities = [...new Set(data.map(d => d.location))];
 
   const select = d3.select("#city-select");
@@ -35,22 +35,22 @@ d3.csv("february_weather.csv").then(data => {
 
   let currentCity = cities[0];
 
-  // 🔹 Scales
+  // Scales
   const x = d3.scaleTime().range([0, width]);
   const y = d3.scaleLinear().range([height, 0]);
 
-  // 🔹 Line generator
+  // Line generator
   const line = d3.line()
     .x(d => x(d.date))
     .y(d => y(d.temp));
 
-  // 🔹 Area generator
+  // Area generator
   const area = d3.area()
     .x(d => x(d.date))
     .y0(d => y(d.min))
     .y1(d => y(d.max));
 
-  // 🔹 Axes
+  // Axes
   const xAxis = g.append("g")
     .attr("transform", `translate(0,${height})`);
 
@@ -73,7 +73,7 @@ d3.csv("february_weather.csv").then(data => {
     .attr("fill", "black")
     .text("Temperature (°C)");
 
-  // 🔹 Paths
+  // Paths
   const areaPath = g.append("path")
     .attr("fill", "lightblue")
     .attr("opacity", 0.4);
@@ -83,7 +83,7 @@ d3.csv("february_weather.csv").then(data => {
     .attr("stroke", "steelblue")
     .attr("stroke-width", 2);
 
-  // 🔹 Hover overlay
+  // Hover overlay
   const overlay = g.append("rect")
     .attr("width", width)
     .attr("height", height)
@@ -136,43 +136,53 @@ d3.csv("february_weather.csv").then(data => {
       areaPath.style("display", "none");
     }
 
-    // 🔥 Tooltip hover
+    // Tooltip hover (fixed to show date)
     overlay
       .on("mousemove", function(event) {
         const [mx] = d3.pointer(event);
-        const date = x.invert(mx);
+        const hoverDate = x.invert(mx);
 
+        // Bisect to find closest date
         const bisect = d3.bisector(d => d.date).left;
-        const i = bisect(filtered, date);
-        const d = filtered[i];
+        let i = bisect(filtered, hoverDate);
+
+        // Clamp index
+        if (i >= filtered.length) i = filtered.length - 1;
+        if (i < 0) i = 0;
+
+        const d0 = filtered[i - 1] || filtered[i];
+        const d1 = filtered[i];
+
+        const d = (!d0 || (hoverDate - d0.date > d1.date - hoverDate)) ? d1 : d0;
 
         if (!d) return;
+
+        const dateFormat = d3.timeFormat("%B %d, %Y");
 
         tooltip
           .style("opacity", 1)
           .html(`
             <strong>${d.location}</strong><br>
+            <strong>Date:</strong> ${dateFormat(d.date)}<br>
             Temp: ${d.temp.toFixed(1)}°C<br>
             Range: ${d.min.toFixed(1)}–${d.max.toFixed(1)}°C
           `)
           .style("left", (event.pageX + 10) + "px")
           .style("top", (event.pageY - 20) + "px");
       })
-      .on("mouseout", () => {
-        tooltip.style("opacity", 0);
-      });
+      .on("mouseout", () => tooltip.style("opacity", 0));
   }
 
-  // 🔹 Initial render
+  // Initial render
   update(currentCity);
 
-  // 🔹 Dropdown
+  // Dropdown
   select.on("change", function() {
     currentCity = this.value;
     update(currentCity);
   });
 
-  // 🔹 Toggle
+  // Toggle
   d3.select("#toggle-btn").on("click", () => {
     showUncertainty = !showUncertainty;
 
@@ -183,99 +193,96 @@ d3.csv("february_weather.csv").then(data => {
   });
 
   // =======================
-// 🔥 SECOND VIS: BAR CHART
-// =======================
+  // SECOND VIS: BAR CHART
+  // =======================
 
-const barSvg = d3.select("#detail"),
-      barMargin = { top: 60, right: 90, bottom: 90, left: 90 },
-      barWidth = 700 - barMargin.left - barMargin.right,
-      barHeight = 350 - barMargin.top - barMargin.bottom;
+  const barSvg = d3.select("#detail"),
+        barMargin = { top: 60, right: 90, bottom: 90, left: 90 },
+        barWidth = 700 - barMargin.left - barMargin.right,
+        barHeight = 350 - barMargin.top - barMargin.bottom;
 
-const barG = barSvg
-  .attr("viewBox", `0 0 700 350`)
-  .append("g")
-  .attr("transform", `translate(${barMargin.left},${barMargin.top})`);
+  const barG = barSvg
+    .attr("viewBox", `0 0 700 350`)
+    .append("g")
+    .attr("transform", `translate(${barMargin.left},${barMargin.top})`);
 
-// 🔹 Compute average temp per city
-const cityAvg = Array.from(
-  d3.group(data, d => d.location),
-  ([city, values]) => ({
-    city: city,
-    avgTemp: d3.mean(values, d => d.temp)
-  })
-);
+  // Compute average temp per city
+  const cityAvg = Array.from(
+    d3.group(data, d => d.location),
+    ([city, values]) => ({
+      city: city,
+      avgTemp: d3.mean(values, d => d.temp)
+    })
+  );
 
-// 🔹 Scales
-const xBar = d3.scaleBand()
-  .domain(cityAvg.map(d => d.city))
-  .range([0, barWidth])
-  .padding(0.2);
+  // Scales
+  const xBar = d3.scaleBand()
+    .domain(cityAvg.map(d => d.city))
+    .range([0, barWidth])
+    .padding(0.2);
 
-const yBar = d3.scaleLinear()
-  .domain([0, d3.max(cityAvg, d => d.avgTemp)])
-  .nice()
-  .range([barHeight, 0]);
+  const yBar = d3.scaleLinear()
+    .domain([0, d3.max(cityAvg, d => d.avgTemp)])
+    .nice()
+    .range([barHeight, 0]);
 
-// 🔹 Axes
-barG.append("g")
-  .attr("transform", `translate(0,${barHeight})`)
-  .call(d3.axisBottom(xBar))
-  .selectAll("text")
-  .attr("transform", "rotate(-30)")
-  .style("text-anchor", "end")
-  .attr("dx", "-0.5em")
-  .attr("dy", "0.25em");
+  // Axes
+  barG.append("g")
+    .attr("transform", `translate(0,${barHeight})`)
+    .call(d3.axisBottom(xBar))
+    .selectAll("text")
+    .attr("transform", "rotate(-30)")
+    .style("text-anchor", "end")
+    .attr("dx", "-0.5em")
+    .attr("dy", "0.25em");
 
-barG.append("g")
-  .call(d3.axisLeft(yBar));
+  barG.append("g")
+    .call(d3.axisLeft(yBar));
 
+  // X-AXIS LABEL (City)
+  barG.append("text")
+    .attr("x", barWidth / 2)
+    .attr("y", barHeight + 60)
+    .attr("text-anchor", "middle")
+    .attr("fill", "black")
+    .text("City");
 
-// 🔥 X-AXIS LABEL (City)
-barG.append("text")
-  .attr("x", barWidth / 2)
-  .attr("y", barHeight + 60)
-  .attr("text-anchor", "middle")
-  .attr("fill", "black")
-  .text("City");
+  // Y-AXIS LABEL (Temperature)
+  barG.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -barHeight / 2 - 20)
+    .attr("y", -45)
+    .attr("text-anchor", "middle")
+    .attr("fill", "black")
+    .text("Average Temperature (°C)");
 
-// 🔥 Y-AXIS LABEL (Temperature)
-barG.append("text")
-  .attr("transform", "rotate(-90)")
-  .attr("x", -barHeight / 2 - 20)
-  .attr("y", -45)
-  .attr("text-anchor", "middle")
-  .attr("fill", "black")
-  .text("Average Temperature (°C)");
+  // Bars
+  barG.selectAll("rect")
+    .data(cityAvg)
+    .enter()
+    .append("rect")
+    .attr("x", d => xBar(d.city))
+    .attr("y", d => yBar(d.avgTemp))
+    .attr("width", xBar.bandwidth())
+    .attr("height", d => barHeight - yBar(d.avgTemp))
+    .attr("fill", "orange")
+    .on("mouseover", function(event, d) {
+      tooltip
+        .style("opacity", 1)
+        .html(`
+          <strong>${d.city}</strong><br>
+          Avg Temp: ${d.avgTemp.toFixed(1)}°C
+        `)
+        .style("left", (event.pageX + 10) + "px")
+        .style("top", (event.pageY - 20) + "px");
+    })
+    .on("mouseout", () => tooltip.style("opacity", 0));
 
-
-// 🔹 Bars
-barG.selectAll("rect")
-  .data(cityAvg)
-  .enter()
-  .append("rect")
-  .attr("x", d => xBar(d.city))
-  .attr("y", d => yBar(d.avgTemp))
-  .attr("width", xBar.bandwidth())
-  .attr("height", d => barHeight - yBar(d.avgTemp))
-  .attr("fill", "orange")
-  .on("mouseover", function(event, d) {
-    tooltip
-      .style("opacity", 1)
-      .html(`
-        <strong>${d.city}</strong><br>
-        Avg Temp: ${d.avgTemp.toFixed(1)}°C
-      `)
-      .style("left", (event.pageX + 10) + "px")
-      .style("top", (event.pageY - 20) + "px");
-  })
-  .on("mouseout", () => tooltip.style("opacity", 0));
-
-
-// 🔹 Title
-barSvg.append("text")
-  .attr("x", 150)
-  .attr("y", 20)
-  .attr("text-anchor", "middle")
-  .text("Average February Temperature by City");
+  // Title
+  barSvg.append("text")
+    .attr("x", 150)
+    .attr("y", 20)
+    .attr("text-anchor", "middle")
+    .text("Average February Temperature by City");
 
 });
