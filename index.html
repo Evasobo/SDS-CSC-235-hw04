@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Temperature Uncertainty Viewer</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+
+  <h1>Temperature Uncertainty Viewer</h1>
+
+  <div class="controls">
+    <label for="city-select">Select City:</label>
+    <select id="city-select"></select>
+
+    <button id="toggle-btn">Hide Uncertainty</button>
+  </div>
+
+  <svg id="chart"></svg>
+
+  <div id="tooltip" class="tooltip"></div>
+
+  <script src="index.js"></script>
+</body>
+</html>
