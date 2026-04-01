@@ -18,7 +18,6 @@ d3.csv("february_weather.csv").then(data => {
   data.forEach(d => {
     d.date = new Date(d.date_time);
     d.temp = +d.temperature_c;
-    data.sort((a, b) => a.date - b.date);
     // create uncertainty
     d.min = d.temp - 2;
     d.max = d.temp + 2;
@@ -76,8 +75,9 @@ d3.csv("february_weather.csv").then(data => {
     .attr("pointer-events", "all");
 
   function update(city) {
-    const filtered = data.filter(d => d.location === city);
-
+    const filtered = data
+    .filter(d => d.location === city)
+    .sort((a, b) => a.date - b.date);
     x.domain(d3.extent(filtered, d => d.date));
     y.domain([
       d3.min(filtered, d => d.min),
