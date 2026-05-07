@@ -25,8 +25,6 @@ d3.csv("february_weather.csv").then(data => {
 
     - Temperature values reflect modeled seasonal patterns
     - Differences across cities (e.g., Phoenix vs others) are expected from simulation rules
-    - Uncertainty is NOT measured error; it is CONSTRUCTED for visualization purposes
-      (±2°C used to simulate sensor/measurement variability)
   */
 
   // Parse data safely
@@ -305,12 +303,27 @@ d3.csv("february_weather.csv").then(data => {
   // AGGREGATION (IMPORTANT CLARITY FIX)
   // =======================
   const cityAvg = Array.from(
-    d3.group(data, d => d.location),
-    ([city, values]) => ({
+  d3.group(data, d => d.location),
+  ([city, values]) => {
+
+    const avgTemp = d3.mean(values, d => d.temp);
+
+    const std = d3.deviation(values, d => d.temp);
+    const n = values.length;
+    const se = std / Math.sqrt(n);
+
+    return {
       city: city,
-      avgTemp: d3.mean(values, d => d.temp)
-    })
-  );
+      avgTemp: avgTemp,
+
+      // 95% confidence interval
+      minTemp: avgTemp - 1.96 * se,
+      maxTemp: avgTemp + 1.96 * se,
+
+      note: "Error bars show 95% confidence interval"
+    };
+  }
+);
 
 
   // =======================
@@ -322,7 +335,10 @@ d3.csv("february_weather.csv").then(data => {
     .padding(0.2);
 
   const yBar = d3.scaleLinear()
-    .domain([0, d3.max(cityAvg, d => d.avgTemp)])
+    .domain([
+      d3.min(cityAvg, d => d.minTemp),
+      d3.max(cityAvg, d => d.maxTemp)
+    ])
     .nice()
     .range([barHeight, 0]);
 
@@ -379,14 +395,52 @@ d3.csv("february_weather.csv").then(data => {
       tooltip
         .style("opacity", 1)
         .html(`
-        <strong>${d.city}</strong><br>
-        Avg Temp: ${d.avgTemp.toFixed(1)}°C<br>
-        <em>Synthetic dataset average</em>
-      `)
+          <strong>${d.city}</strong><br>
+          <strong>Average Temp:</strong> ${d.avgTemp.toFixed(1)}°C<br>
+          <strong>95% CI:</strong> ${d.minTemp.toFixed(1)}°C – ${d.maxTemp.toFixed(1)}°C<br>
+          <em>Synthetic dataset average</em>
+        `)
         .style("left", (event.pageX + 10) + "px")
         .style("top", (event.pageY - 20) + "px");
     })
     .on("mouseout", () => tooltip.style("opacity", 0));
+    // =======================
+    // ERROR BARS (UNCERTAINTY)
+    // =======================
+
+    barG.selectAll(".error-line")
+      .data(cityAvg)
+      .enter()
+      .append("line")
+      .attr("class", "error-line")
+      .attr("x1", d => xBar(d.city) + xBar.bandwidth() / 2)
+      .attr("x2", d => xBar(d.city) + xBar.bandwidth() / 2)
+      .attr("y1", d => yBar(d.minTemp))
+      .attr("y2", d => yBar(d.maxTemp))
+      .attr("stroke", "black")
+      .attr("stroke-width", 2);
+
+    // Top caps
+    barG.selectAll(".top-cap")
+      .data(cityAvg)
+      .enter()
+      .append("line")
+      .attr("x1", d => xBar(d.city) + xBar.bandwidth()/2 - 8)
+      .attr("x2", d => xBar(d.city) + xBar.bandwidth()/2 + 8)
+      .attr("y1", d => yBar(d.maxTemp))
+      .attr("y2", d => yBar(d.maxTemp))
+      .attr("stroke", "black");
+
+    // Bottom caps
+    barG.selectAll(".bottom-cap")
+      .data(cityAvg)
+      .enter()
+      .append("line")
+      .attr("x1", d => xBar(d.city) + xBar.bandwidth()/2 - 8)
+      .attr("x2", d => xBar(d.city) + xBar.bandwidth()/2 + 8)
+      .attr("y1", d => yBar(d.minTemp))
+      .attr("y2", d => yBar(d.minTemp))
+      .attr("stroke", "black");
 
 
   // =======================

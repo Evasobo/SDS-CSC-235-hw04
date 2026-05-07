@@ -1,26 +1,63 @@
 body {
   font-family: Arial, sans-serif;
   text-align: center;
+  background-color: #f7f7f7;
+  margin: 0;
+  padding: 20px;
+  color: #222;
+}
+
+h1 {
+  margin-bottom: 10px;
+  font-size: 32px;
+}
+
+h2 {
+  margin-top: 40px;
+  font-size: 24px;
 }
 
 .controls {
-  margin-bottom: 10px;
+  margin: 20px 0;
+}
+
+select,
+button {
+  padding: 8px 12px;
+  margin-left: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #f0f0f0;
 }
 
 svg {
   width: 800px;
   height: 500px;
-  margin: auto;
+  margin: 20px auto;
   display: block;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .tooltip {
   position: absolute;
   background: white;
-  border: 1px solid #ccc;
-  padding: 8px;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  padding: 10px;
   pointer-events: none;
   opacity: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 text {
@@ -29,10 +66,124 @@ text {
 
 .note {
   max-width: 900px;
-  margin: 10px auto;
+  margin: 10px auto 20px auto;
   font-size: 14px;
   background: #fff3cd;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid #ffeeba;
+  border-radius: 6px;
+  line-height: 1.5;
+}
+
+.description {
+  max-width: 900px;
+  margin: 0 auto 25px auto;
+  font-size: 14px;
+  color: #444;
+  line-height: 1.6;
+}
+
+.error-line,
+.top-cap,
+.bottom-cap {
+  stroke: black;
+  stroke-width: 2;
+}
+
+rect:hover {
+  opacity: 0.8;
+}body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background-color: #f7f7f7;
+  margin: 0;
+  padding: 20px;
+  color: #222;
+}
+
+h1 {
+  margin-bottom: 10px;
+  font-size: 32px;
+}
+
+h2 {
+  margin-top: 40px;
+  font-size: 24px;
+}
+
+.controls {
+  margin: 20px 0;
+}
+
+select,
+button {
+  padding: 8px 12px;
+  margin-left: 8px;
+  border: 1px solid #ccc;
   border-radius: 5px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #f0f0f0;
+}
+
+svg {
+  width: 800px;
+  height: 500px;
+  margin: 20px auto;
+  display: block;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.tooltip {
+  position: absolute;
+  background: white;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  padding: 10px;
+  pointer-events: none;
+  opacity: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+text {
+  fill: black;
+}
+
+.note {
+  max-width: 900px;
+  margin: 10px auto 20px auto;
+  font-size: 14px;
+  background: #fff3cd;
+  padding: 12px;
+  border: 1px solid #ffeeba;
+  border-radius: 6px;
+  line-height: 1.5;
+}
+
+.description {
+  max-width: 900px;
+  margin: 0 auto 25px auto;
+  font-size: 14px;
+  color: #444;
+  line-height: 1.6;
+}
+
+.error-line,
+.top-cap,
+.bottom-cap {
+  stroke: black;
+  stroke-width: 2;
+}
+
+rect:hover {
+  opacity: 0.8;
 }
