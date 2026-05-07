@@ -1,18 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Temperature Uncertainty Viewer</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
+
 <body>
 
   <h1>Temperature Uncertainty Viewer</h1>
+
+  <div class="note">
+    <strong>Important:</strong> This visualization uses <u>synthetic weather data</u> generated using a Python-based
+    simulation (Faker library).
+    Values reflect realistic seasonal patterns but are not real-world measurements.
+  </div>
+
   <p class="description">
-  This visualization shows average daily February temperatures for multiple cities.
-  The shaded blue band represents a simulated uncertainty range based on possible temperature variation throughout the day.
-  Users can compare trends, variability, and average temperatures between cities.
+    This visualization shows average daily February temperatures for multiple cities.
+    The shaded blue band represents a simulated uncertainty range based on possible temperature variation throughout the
+    day.
+    Users can compare trends, variability, and average temperatures between cities.
   </p>
 
   <div class="controls">
@@ -33,4 +43,5 @@
 
   <script src="index.js"></script>
 </body>
+
 </html>

@@ -26,3 +26,13 @@ svg {
 text {
   fill: black;
 }
+
+.note {
+  max-width: 900px;
+  margin: 10px auto;
+  font-size: 14px;
+  background: #fff3cd;
+  padding: 10px;
+  border: 1px solid #ffeeba;
+  border-radius: 5px;
+}
